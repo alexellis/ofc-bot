@@ -22,6 +22,16 @@ OpenFaaS Cloud admin-bot for Slack
 /functions <username>
 ```
 
+### Get metrics for a function
+
+```
+/metrics <function>
+```
+
+This will show the success / error count for the last `24h` window.
+
+## Other config
+
 Template: `golang-middleware`
 
 Secret name: `USERNAME-ofc-bot-secrets`
