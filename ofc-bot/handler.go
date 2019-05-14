@@ -76,7 +76,7 @@ func makeOwners(functions *[]function) map[string]int {
 	owners := make(map[string]int)
 
 	for _, function := range *functions {
-		owner := function.Annotations[owner]
+		owner := function.Labels[owner]
 		if len(owner) > 0 {
 			if _, ok := owners[owner]; !ok {
 				owners[owner] = 0
