@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/openfaas/openfaas-cloud/sdk"
 )
@@ -70,6 +72,29 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 	if len(command) > 0 {
 
 		switch command {
+		case "/metrics":
+			if len(text) == 0 {
+				w.Write([]byte("Please give a function name with this slash command"))
+				w.WriteHeader(http.StatusOK)
+				return true
+			}
+
+			res, err := queryStats(text, time.Hour*24)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return true
+			}
+
+			var body []byte
+			if res.Body != nil {
+				defer res.Body.Close()
+				body, _ = ioutil.ReadAll(res.Body)
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write(body)
+			return true
+
 		case "/functions":
 			res, err := doFunctionsQuery()
 			if err != nil {
@@ -206,4 +231,12 @@ func makeOwners(functions *[]function) map[string]int {
 		}
 	}
 	return owners
+}
+
+func queryStats(functionName string, window time.Duration) (*http.Response, error) {
+	getPath := os.Getenv("gateway_host") + "/function/system-metrics?function=" + functionName + "&metrics_window=" + strconv.Itoa(int(window.Hours()))
+	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
+
+	res, err := http.DefaultClient.Do(req)
+	return res, err
 }
