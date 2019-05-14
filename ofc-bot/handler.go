@@ -39,14 +39,14 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var query url.Values
+	var query *url.Values
 	if len(input) > 0 {
 		q, err := url.ParseQuery(string(input))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		query = q
+		query = &q
 	}
 
 	if token != query.Get("token") {
