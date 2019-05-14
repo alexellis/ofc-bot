@@ -36,6 +36,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	token, err := sdk.ReadSecret("token")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var query url.Values
@@ -50,6 +51,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	if token != query.Get("token") {
 		http.Error(w, fmt.Sprintf("Token: %s, invalid", query.Get("token")), http.StatusUnauthorized)
+		return
 	}
 	headerWritten := processCommand(w, r, query)
 
