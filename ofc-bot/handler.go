@@ -55,10 +55,12 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 				out := ""
 				owners := makeOwners(&functions)
-
-				for k := range owners {
-					out = out + k + "\n"
-
+				if len(owners) > 0 {
+					for k := range owners {
+						out = out + k + "\n"
+					}
+				} else {
+					out = "No users found"
 				}
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(out))
