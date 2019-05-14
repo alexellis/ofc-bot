@@ -95,6 +95,13 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 				defer res.Body.Close()
 				body, _ = ioutil.ReadAll(res.Body)
 			}
+
+			if res.StatusCode != http.StatusOK {
+				http.Error(w, fmt.Sprintf("Error query metrics: %s, status: %d", string(body), res.StatusCode),
+					http.StatusInternalServerError)
+				return true
+			}
+
 			m := Metrics{}
 			marshalErr := json.Unmarshal(body, &m)
 			if marshalErr != nil {
@@ -257,5 +264,6 @@ func queryStats(functionName string, window time.Duration) (*http.Response, erro
 	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
 
 	res, err := http.DefaultClient.Do(req)
+
 	return res, err
 }
