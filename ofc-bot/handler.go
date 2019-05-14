@@ -10,6 +10,8 @@ import (
 	"github.com/openfaas/openfaas-cloud/sdk"
 )
 
+const owner = "com.openfaas.cloud.git-owner"
+
 func Handle(w http.ResponseWriter, r *http.Request) {
 	var input []byte
 
@@ -52,18 +54,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 				}
 
 				out := ""
-				owners := make(map[string]int)
-
-				for _, function := range functions {
-					owner := function.Annotations[owner]
-					if len(owner) > 0 {
-						if _, ok := owners[owner]; !ok {
-							owners[owner] = 0
-						}
-
-						owners[owner] = owners[owner] + 1
-					}
-				}
+				owners := makeOwners(&functions)
 
 				for k := range owners {
 					out = out + k + "\n"
@@ -79,7 +70,21 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Nothing to do", http.StatusBadRequest)
 }
 
-const owner = "com.openfaas.cloud.git-owner"
+func makeOwners(functions *[]function) map[string]int {
+	owners := make(map[string]int)
+
+	for _, function := range *functions {
+		owner := function.Annotations[owner]
+		if len(owner) > 0 {
+			if _, ok := owners[owner]; !ok {
+				owners[owner] = 0
+			}
+
+			owners[owner] = owners[owner] + 1
+		}
+	}
+	return owners
+}
 
 func readFunctions(res *http.Response) ([]function, error) {
 	functions := []function{}
