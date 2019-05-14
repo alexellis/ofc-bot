@@ -258,7 +258,7 @@ func makeOwners(functions *[]function) map[string]int {
 }
 
 func queryStats(functionName string, window time.Duration) (*http.Response, error) {
-	getPath := os.Getenv("gateway_host") + "/function/system-metrics/?function=" + functionName + "&metrics_window=" + strconv.Itoa(int(window.Hours()))
+	getPath := os.Getenv("gateway_host") + "/function/system-metrics/?function=" + functionName + "&metrics_window=" + strconv.Itoa(int(window.Hours())) + "h"
 	os.Stderr.WriteString(getPath + "\n")
 
 	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
