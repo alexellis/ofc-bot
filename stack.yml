@@ -1,0 +1,13 @@
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+
+functions:
+  ofc-bot:
+    lang: golang-middleware
+    handler: ./ofc-bot
+    image: ofc-bot:latest
+    secrets:
+      - ofc-bot-secrets
+    environment:
+      gateway_host: http://gateway.openfaas:8080
