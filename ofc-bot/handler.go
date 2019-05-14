@@ -53,17 +53,21 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Token: %s, invalid", query.Get("token")), http.StatusUnauthorized)
 		return
 	}
-	headerWritten := processCommand(w, r, &query)
+
+	command := query.Get("command")
+	text := query.Get("text")
+
+	headerWritten := processCommand(w, r, command, text)
 
 	if !headerWritten {
 		http.Error(w, "Nothing to do", http.StatusBadRequest)
 	}
 }
 
-func processCommand(w http.ResponseWriter, r *http.Request, query *url.Values) bool {
-	if cmd := query.Get("command"); len(cmd) > 0 {
+func processCommand(w http.ResponseWriter, r *http.Request, command, text string) bool {
+	if len(command) > 0 {
 
-		switch cmd {
+		switch command {
 		case "/functions":
 			res, err := doFunctionsQuery()
 			if err != nil {
@@ -78,7 +82,7 @@ func processCommand(w http.ResponseWriter, r *http.Request, query *url.Values) b
 			}
 
 			var username string
-			if text := query.Get("text"); len(cmd) > 0 {
+			if len(text) > 0 {
 				username = text
 			}
 
@@ -123,7 +127,6 @@ func processCommand(w http.ResponseWriter, r *http.Request, query *url.Values) b
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(out))
 			return true
-
 		}
 	}
 
