@@ -57,8 +57,12 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
 
-				out := ""
-				list := makeFunctions(&functions)
+				var username string
+				if text := q.Get("text"); len(cmd) > 0 {
+					username = text
+				}
+
+				list := makeFunctions(&functions, username)
 				if len(list) > 0 {
 					for _, k := range list {
 						out = out + k + "\n"
@@ -103,10 +107,20 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Nothing to do", http.StatusBadRequest)
 }
 
-func makeFunctions(functions *[]function) []string {
+func makeFunctions(functions *[]function, username string) []string {
 	list := []string{}
 	for _, function := range *functions {
-		list = append(list, function.Name)
+		add := true
+
+		if len(username) > 0 {
+			owner := function.Labels[owner]
+			add = len(owner) > 0 && owner == username
+		}
+
+		if add {
+			list = append(list, function.Name)
+		}
+
 	}
 	return list
 }
