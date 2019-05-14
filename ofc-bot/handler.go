@@ -24,7 +24,7 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	if len(input) > 0 {
 		q, err := url.ParseQuery(string(input))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -46,24 +46,14 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
 
-				if res.Body != nil {
+				functions, err := readFunctions(res)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
 
-					out := ""
-					defer res.Body.Close()
-					body, _ := ioutil.ReadAll(res.Body)
-					functions := []function{}
-					marshalErr := json.Unmarshal(body, &functions)
-					if marshalErr != nil {
-						http.Error(w, marshalErr.Error(), http.StatusInternalServerError)
-					}
-
-					for _, function := range functions {
-						out = out + function.Name + "\n"
-					}
-					w.WriteHeader(http.StatusOK)
-
-					w.Write([]byte(out))
-					return
+				out := ""
+				for _, function := range functions {
+					out = out + function.Name + "\n"
 				}
 
 				return
@@ -71,7 +61,22 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.WriteHeader(http.StatusBadRequest)
+	http.Error(w, "Nothing to do", http.StatusBadRequest)
+}
+
+func readFunctions(res *http.Response) ([]function, error) {
+	functions := []function{}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+		body, _ := ioutil.ReadAll(res.Body)
+		marshalErr := json.Unmarshal(body, &functions)
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+	}
+
+	return functions, nil
 }
 
 type function struct {
