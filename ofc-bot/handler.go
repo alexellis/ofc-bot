@@ -29,8 +29,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if cmd := q.Get("command"); len(cmd) > 0 {
-			if cmd == "users" {
-				w.WriteHeader(http.StatusOK)
+			if cmd == "/users" {
+
 				getPath := os.Getenv("gateway_host") + "/system/functions"
 				req, _ := http.NewRequest(http.MethodGet, getPath, nil)
 				secret, err := sdk.ReadSecret("basic-auth-password")
@@ -56,6 +56,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 					out = out + function.Name + "\n"
 				}
 
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(out))
 				return
 			}
 		}
