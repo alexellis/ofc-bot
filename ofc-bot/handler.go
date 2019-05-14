@@ -12,6 +12,20 @@ import (
 
 const owner = "com.openfaas.cloud.git-owner"
 
+func doFunctionsQuery() (*http.Response, error) {
+	getPath := os.Getenv("gateway_host") + "/system/functions"
+	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
+	secret, err := sdk.ReadSecret("basic-auth-password")
+	if err != nil {
+		return nil, err
+	}
+
+	req.SetBasicAuth("admin", secret)
+
+	res, err := http.DefaultClient.Do(req)
+	return res, err
+}
+
 func Handle(w http.ResponseWriter, r *http.Request) {
 	var input []byte
 
@@ -31,19 +45,36 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if cmd := q.Get("command"); len(cmd) > 0 {
-			if cmd == "/users" {
+			if cmd == "/functions" {
 
-				getPath := os.Getenv("gateway_host") + "/system/functions"
-				req, _ := http.NewRequest(http.MethodGet, getPath, nil)
-				secret, err := sdk.ReadSecret("basic-auth-password")
+				res, err := doFunctionsQuery()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
 				}
 
-				req.SetBasicAuth("admin", secret)
+				functions, err := readFunctions(res)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
 
-				res, err := http.DefaultClient.Do(req)
+				out := ""
+				list := makeFunctions(&functions)
+				if len(list) > 0 {
+					for _, k := range list {
+						out = out + k + "\n"
+					}
+				} else {
+					out = "No functions found"
+				}
+
+				out += "\n" + string(input)
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(out))
+				return
+			}
+			if cmd == "/users" {
+
+				res, err := doFunctionsQuery()
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
@@ -70,6 +101,14 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "Nothing to do", http.StatusBadRequest)
+}
+
+func makeFunctions(functions *[]function) []string {
+	list := []string{}
+	for _, function := range *functions {
+		list = append(list, function.Name)
+	}
+	return list
 }
 
 func makeOwners(functions *[]function) map[string]int {
