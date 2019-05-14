@@ -52,7 +52,10 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 					defer res.Body.Close()
 					body, _ := ioutil.ReadAll(res.Body)
 					functions := []function{}
-					json.Unmarshal(body, &functions)
+					marshalErr := json.Unmarshal(body, &functions)
+					if marshalErr != nil {
+						http.Error(w, marshalErr.Error(), http.StatusInternalServerError)
+					}
 
 					for _, function := range functions {
 						out = out + function.Name + "\n"
