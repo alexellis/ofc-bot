@@ -53,17 +53,18 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Token: %s, invalid", query.Get("token")), http.StatusUnauthorized)
 		return
 	}
-	headerWritten := processCommand(w, r, query)
+	headerWritten := processCommand(w, r, &query)
 
 	if !headerWritten {
 		http.Error(w, "Nothing to do", http.StatusBadRequest)
 	}
 }
 
-func processCommand(w http.ResponseWriter, r *http.Request, query url.Values) bool {
+func processCommand(w http.ResponseWriter, r *http.Request, query *url.Values) bool {
 	if cmd := query.Get("command"); len(cmd) > 0 {
-		if cmd == "/functions" {
 
+		switch cmd {
+		case "/functions":
 			res, err := doFunctionsQuery()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,9 +96,8 @@ func processCommand(w http.ResponseWriter, r *http.Request, query url.Values) bo
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(out))
 			return true
-		}
-		if cmd == "/users" {
 
+		case "/users":
 			res, err := doFunctionsQuery()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,8 +123,10 @@ func processCommand(w http.ResponseWriter, r *http.Request, query url.Values) bo
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(out))
 			return true
+
 		}
 	}
+
 	return false
 }
 
