@@ -15,6 +15,11 @@ import (
 
 const owner = "com.openfaas.cloud.git-owner"
 
+type Metrics struct {
+	Success int `json:"success"`
+	Failure int `json:"failure"`
+}
+
 type function struct {
 	Name            string            `json:"name"`
 	Image           string            `json:"image"`
@@ -78,8 +83,8 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 				w.WriteHeader(http.StatusOK)
 				return true
 			}
-
-			res, err := queryStats(text, time.Hour*24)
+			window := time.Hour * 24
+			res, err := queryStats(text, window)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return true
@@ -90,9 +95,21 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 				defer res.Body.Close()
 				body, _ = ioutil.ReadAll(res.Body)
 			}
+			m := Metrics{}
+			marshalErr := json.Unmarshal(body, &m)
+			if marshalErr != nil {
+				http.Error(w, marshalErr.Error(), http.StatusInternalServerError)
+				return true
+			}
+
+			out := fmt.Sprintf("Metrics for: %s, over: %s.\n%d - success\n%d - errors\n",
+				text,
+				window.String(),
+				m.Success,
+				m.Failure)
 
 			w.WriteHeader(http.StatusOK)
-			w.Write(body)
+			w.Write([]byte(out))
 			return true
 
 		case "/functions":
