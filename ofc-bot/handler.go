@@ -56,11 +56,13 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 				for _, function := range functions {
 					owner := function.Annotations[owner]
-					if _, ok := owners[owner]; !ok {
-						owners[owner] = 0
-					}
+					if len(owner) > 0 {
+						if _, ok := owners[owner]; !ok {
+							owners[owner] = 0
+						}
 
-					owners[owner] = owners[owner] + 1
+						owners[owner] = owners[owner] + 1
+					}
 				}
 
 				for k := range owners {
