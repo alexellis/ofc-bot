@@ -11,3 +11,5 @@ functions:
       - ofc-bot-secrets
     environment:
       gateway_host: http://gateway.openfaas:8080
+      write_debug: true
+

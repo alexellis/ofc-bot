@@ -57,6 +57,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	command := query.Get("command")
 	text := query.Get("text")
 
+	os.Stderr.Write([]byte(fmt.Sprintf("debug - command: %q, text: %q\n", command, text)))
+
 	headerWritten := processCommand(w, r, command, text)
 
 	if !headerWritten {
