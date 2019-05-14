@@ -84,8 +84,9 @@ func processCommand(w http.ResponseWriter, r *http.Request, query url.Values) bo
 			out := ""
 			list := makeFunctions(&functions, username)
 			if len(list) > 0 {
+				out := "Functions:\n"
 				for _, k := range list {
-					out = out + k + "\n"
+					out = out + "- " + k + "\n"
 				}
 			} else {
 				out = "No functions found"
@@ -112,8 +113,9 @@ func processCommand(w http.ResponseWriter, r *http.Request, query url.Values) bo
 			out := ""
 			owners := makeOwners(&functions)
 			if len(owners) > 0 {
+				out := "Users:\n"
 				for k := range owners {
-					out = out + k + "\n"
+					out = out + "- " + k + "\n"
 				}
 			} else {
 				out = "No users found"
