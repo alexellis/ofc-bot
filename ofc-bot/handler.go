@@ -91,7 +91,13 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 			out := ""
 			list := makeFunctions(&functions, username)
 			if len(list) > 0 {
-				out = "Functions:\n"
+				out = "Functions"
+				if len(username) > 0 {
+					out = out + " for (" + username + ")"
+				}
+
+				out = out + ":\n"
+
 				for _, k := range list {
 					out = out + "- " + k + "\n"
 				}
