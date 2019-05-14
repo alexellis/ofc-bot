@@ -52,10 +52,21 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 				}
 
 				out := ""
+				owners := make(map[string]int)
+
 				for _, function := range functions {
-					out = out + function.Name + "\n"
+					owner := function.Annotations[owner]
+					if _, ok := owners[owner]; !ok {
+						owners[owner] = 0
+					}
+
+					owners[owner] = owners[owner] + 1
 				}
 
+				for k := range owners {
+					out = out + k + "\n"
+
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(out))
 				return
@@ -65,6 +76,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	http.Error(w, "Nothing to do", http.StatusBadRequest)
 }
+
+const owner = "com.openfaas.cloud.git-owner"
 
 func readFunctions(res *http.Response) ([]function, error) {
 	functions := []function{}
