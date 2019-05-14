@@ -40,3 +40,16 @@ Secrets literals:
 
 * `basic-auth-password` - for your gateway admin user
 * `token` - Slack token for verification
+
+Seal your own secrets:
+
+```sh
+export SCM_USER="alexellis"
+export BASIC_AUTH=""
+export SLACk_TOKEN=""
+
+faas-cli cloud seal \
+  --name $SCM_USER-ofc-bot-secrets \
+  --literal basic-auth-password=BASIC_AUTH \
+  --literal token=SLACk_TOKEN
+```
