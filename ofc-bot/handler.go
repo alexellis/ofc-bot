@@ -176,13 +176,16 @@ func makeFunctions(functions *[]function, username string) []string {
 	for _, function := range *functions {
 		add := true
 
-		if len(username) > 0 {
-			owner := function.Labels[owner]
-			add = len(owner) > 0 && owner == username
-		}
+		// Filter out system functions
+		owner := function.Labels[owner]
+		if len(owner) > 0 {
+			if len(username) > 0 {
+				add = len(owner) > 0 && owner == username
+			}
 
-		if add {
-			list = append(list, function.Name)
+			if add {
+				list = append(list, function.Name)
+			}
 		}
 
 	}
