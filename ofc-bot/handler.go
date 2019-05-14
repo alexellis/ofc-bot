@@ -91,7 +91,7 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 			out := ""
 			list := makeFunctions(&functions, username)
 			if len(list) > 0 {
-				out := "Functions:\n"
+				out = "Functions:\n"
 				for _, k := range list {
 					out = out + "- " + k + "\n"
 				}
@@ -119,13 +119,14 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 			out := ""
 			owners := makeOwners(&functions)
 			if len(owners) > 0 {
-				out := "Users:\n"
+				out = "Users:\n"
 				for k := range owners {
 					out = out + "- " + k + "\n"
 				}
 			} else {
 				out = "No users found"
 			}
+
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(out))
 			return true
