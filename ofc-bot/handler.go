@@ -77,6 +77,41 @@ func processCommand(w http.ResponseWriter, r *http.Request, command, text string
 	if len(command) > 0 {
 
 		switch command {
+		case "/logs":
+			if len(text) == 0 {
+				w.Write([]byte("Please give a function name with this slash command"))
+				w.WriteHeader(http.StatusOK)
+				return true
+			}
+
+			payloadSecret, err := sdk.ReadSecret("payload-secret")
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return true
+			}
+
+			res, err := queryLogs(text, payloadSecret)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return true
+			}
+
+			var body []byte
+			if res.Body != nil {
+				defer res.Body.Close()
+				body, _ = ioutil.ReadAll(res.Body)
+			}
+
+			if res.StatusCode != http.StatusOK {
+				http.Error(w, fmt.Sprintf("Error fetching logs, status: %d, error: %s", res.StatusCode, string(body)),
+					http.StatusInternalServerError)
+				return true
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(body))
+			return true
+
 		case "/metrics":
 			if len(text) == 0 {
 				w.Write([]byte("Please give a function name with this slash command"))
@@ -262,6 +297,19 @@ func queryStats(functionName string, window time.Duration) (*http.Response, erro
 	os.Stderr.WriteString(getPath + "\n")
 
 	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
+
+	res, err := http.DefaultClient.Do(req)
+
+	return res, err
+}
+
+func queryLogs(functionName string, payloadSecret string) (*http.Response, error) {
+	getPath := os.Getenv("gateway_host") + "/function/system-logs/?function=" + functionName
+
+	os.Stderr.WriteString(getPath + "\n")
+
+	req, _ := http.NewRequest(http.MethodGet, getPath, nil)
+	req.Header.Add("X-Cloud-Payload-Secret", payloadSecret)
 
 	res, err := http.DefaultClient.Do(req)
 

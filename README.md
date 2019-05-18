@@ -30,6 +30,14 @@ OpenFaaS Cloud admin-bot for Slack
 
 This will show the success / error count for the last `24h` window.
 
+### Get logs for a function
+
+```
+/logs <function>
+```
+
+View the last 100 lines of logs for the first pod found in the cluster with a matching function name.
+
 ## Other config
 
 Template: `golang-middleware`
@@ -46,10 +54,12 @@ Seal your own secrets:
 ```sh
 export SCM_USER="alexellis"
 export BASIC_AUTH=""
-export SLACk_TOKEN=""
+export SLACK_TOKEN=""
+export PAYLOAD_SECRET=""
 
 faas-cli cloud seal \
   --name $SCM_USER-ofc-bot-secrets \
-  --literal basic-auth-password=BASIC_AUTH \
-  --literal token=SLACk_TOKEN
+  --literal basic-auth-password=$BASIC_AUTH \
+  --literal token=$SLACK_TOKEN \
+  --literal payload-secret=$PAYLOAD_SECRET
 ```
