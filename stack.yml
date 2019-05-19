@@ -7,6 +7,8 @@ functions:
     lang: golang-middleware
     handler: ./ofc-bot
     image: ofc-bot:latest
+    labels:
+      com.openfaas.scale.zero: "false"
     secrets:
       - ofc-bot-secrets
     environment:
